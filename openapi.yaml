@@ -1,0 +1,414 @@
+openapi: 3.0.3
+info:
+  title: PCO Services - OpenAPI 3.0
+  description: |-
+    Description
+  termsOfService: http://pco.com/tos
+  contact:
+    email: me@me.com
+  license:
+    name: Apache 2.0
+    url: http://example.com
+  version: 2018-11-01
+externalDocs:
+  description: PCO Developer API Explorer
+  url: https://api.planningcenteronline.com/explorer/services/v2
+servers:
+  - url: https://api.planningcenteronline.com/services/v2
+tags:
+  - name: songs
+    description: Songs
+    externalDocs:
+      description: Find out more
+      url: https://api.planningcenteronline.com/explorer/services/v2/songs
+paths:
+  /songs:
+    get:
+      tags:
+        - songs
+      summary: Get songs
+      description: Get songs
+      operationId: getSongs
+      parameters:
+        - in: query
+          name: where
+          schema:
+            type: object
+          description: query parameters
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SongListResponse'
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+      security:
+        - basic_auth: []
+        - pestore_auth:
+            - write:songs
+            - read:songs
+    # post:
+    #   tags:
+    #     - songs
+    #   summary: Add a new song
+    #   description: Add a new song
+    #   operationId: addSong
+    #   requestBody:
+    #     description: Create a song
+    #     content:
+    #       application/json:
+    #         schema:
+    #           $ref: '#/components/schemas/Song'
+    #     required: true
+    #   responses:
+    #     '200':
+    #       description: Successful operation
+    #       content:
+    #         application/json:
+    #           schema:
+    #             $ref: '#/components/schemas/SongResponse'
+    #     '405':
+    #       description: Invalid input
+    #   security:
+    #     - basic_auth: []
+    #     - petstore_auth:
+    #         - write:songs
+    #         - read:songs
+  /songs/{songId}:
+    get:
+      tags:
+        - songs
+      summary: Find song by ID
+      description: Returns a single song
+      operationId: getSongById
+      parameters:
+        - name: songId
+          in: path
+          description: ID of song to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SongResponse'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Pet not found
+      security:
+        - basic_auth: []
+        - petstore_auth:
+            - write:songs
+            - read:songs
+    # patch:
+    #   tags:
+    #     - songs
+    #   summary: Updates a song
+    #   description: ''
+    #   operationId: updateSong
+    #   parameters:
+    #     - name: songId
+    #       in: path
+    #       description: ID of song that needs to be updated
+    #       required: true
+    #       schema:
+    #         type: integer
+    #         format: int64
+    #   responses:
+    #     '200':
+    #       description: successful operation
+    #       content:
+    #         application/json:
+    #           schema:
+    #             $ref: '#/components/schemas/SongResponse'
+    #     '405':
+    #       description: Invalid input
+    #   security:
+    #     - petstore_auth:
+    #         - write:songs
+    #         - read:songs
+    # delete:
+    #   tags: [songs]
+    #   summary: Deletes a song
+    #   description: delete a song
+    #   operationId: deleteSong
+    #   parameters:
+    #     - name: songId
+    #       in: path
+    #       description: Song id to delete
+    #       required: true
+    #       schema:
+    #         type: integer
+    #         format: int64
+    #   responses:
+    #     '400':
+    #       description: Invalid song value
+    #   security:
+    #     - petstore_auth:
+    #         - write:songs
+    #         - read:songs
+  /songs/{songId}/arrangements:
+    get:
+      tags: [songs]
+      operationId: getArrangements
+      parameters:
+        - name: songId
+          in: path
+          description: Song id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrangementListResponse'
+      security:
+        - basic_auth: []
+  #   post:
+  #     tags: [songs]
+  #     operationId: createArrangement
+  #     parameters:
+  #       - name: songId
+  #         in: path
+  #         description: Song id
+  #         required: true
+  #         schema:
+  #           type: integer
+  #           format: int64
+  #     responses:
+  #       '200':
+  #         description: successful operation
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/Arrangement'
+  /songs/{songId}/arrangements/{arrangementId}:
+    get:
+      tags: [songs]
+      operationId: getArrangementById
+      parameters:
+        - name: songId
+          in: path
+          description: Song id
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: arrangementId
+          in: path
+          description: Arrangement id to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrangementResponse'
+      security:
+        - basic_auth: []
+  #   patch:
+  #     tags: [songs]
+  #     operationId: updateArrangement
+  #     parameters:
+  #       - name: songId
+  #         in: path
+  #         description: Song id
+  #         required: true
+  #         schema:
+  #           type: integer
+  #           format: int64
+  #       - name: ArrangementId
+  #         in: path
+  #         description: Arrangement id to delete
+  #         required: true
+  #         schema:
+  #           type: integer
+  #           format: int64
+  #     responses:
+  #       '200':
+  #         description: successful operation
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/Arrangement'
+  #   delete:
+  #     tags: [songs]
+  #     operationId: deleteArrangement
+  #     parameters:
+  #       - name: songId
+  #         in: path
+  #         description: Song id
+  #         required: true
+  #         schema:
+  #           type: integer
+  #           format: int64
+  #       - name: ArrangementId
+  #         in: path
+  #         description: Arrangement id to delete
+  #         required: true
+  #         schema:
+  #           type: integer
+  #           format: int64
+  #     responses:
+  #       '200':
+  #         description: successful operation
+  #         # content:
+  #           # application?/json:
+  #             # schema:
+  #             #   $ref: '#/components/schemas/Song'
+components:
+  schemas:
+    BaseDataObject:
+      required:
+        - type
+        - id
+      type: object
+      properties:
+        type:
+          type: string
+          example: "Song"
+        id:
+          type: string
+          example: "1"
+    SongListResponse:
+      type: object
+      properties:
+        root:
+          type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Song'
+    SongResponse:
+      type: object
+      properties:
+        root:
+          type: object
+          properties:
+            data:
+              type: object
+              $ref: '#/components/schemas/Song'
+    Song:
+      allOf:
+        - $ref: '#/components/schemas/BaseDataObject'
+        - type: object
+          required:
+            - attributes
+          properties:
+            attributes:
+              type: object
+              required:
+                - title
+              properties:
+                title:
+                  type: string
+                  example: "Hosanna"
+                created_at:
+                  type: string
+                  format: date-time
+                  example: "2000-01-01T12:00:00Z"
+                updated_at:
+                  type: string
+                  format: date-time
+                  example: "2000-01-01T12:00:00Z"
+                admin:
+                  type: string
+                author:
+                  type: string
+                copyright:
+                  type: string
+                hidden:
+                  type: boolean
+                notes:
+                  type: string
+                themes:
+                  type: string
+                last_scheduled_short_dates:
+                  type: string
+                last_scheduled_at:
+                  type: string
+                  format: date-time
+                  example: "2000-01-01T12:00:00Z"
+                ccli_number:
+                  type: number
+                  format: int64
+    ArrangementListResponse:
+      type: object
+      properties:
+        root:
+          type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Arrangement'
+    ArrangementResponse:
+      type: object
+      properties:
+        root:
+          type: object
+          properties:
+            data:
+              type: object
+              $ref: '#/components/schemas/Arrangement'
+    Arrangement:
+      allOf:
+        - $ref: '#/components/schemas/BaseDataObject'
+        - type: object
+          required:
+            - attributes
+          properties:
+            attributes:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  example: Default Arrangement
+                bpm:
+                  type: number
+                  format: float
+                lyrics:
+                  type: string
+  requestBodies:
+    Song:
+      description: Song object
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Song'
+  securitySchemes:
+    petstore_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://petstore3.swagger.io/oauth/authorize
+          scopes:
+            write:pets: modify pets in your account
+            read:pets: read your pets
+    basic_auth:
+      type: http
+      scheme: basic
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
