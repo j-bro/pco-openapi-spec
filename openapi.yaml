@@ -37,24 +37,9 @@ paths:
           description: query parameters
           explode: true
           style: deepObject
-        - in: query
-          name: order
-          schema:
-            type: string
-            enum:
-              - none
-              - title
-              - created_at
-              - updated_at
-              - last_scheduled_at
-        - in: query
-          name: offset
-          schema:
-            type: integer
-        - in: query
-          name: per_page
-          schema:
-            type: integer
+        - $ref: "#/components/parameters/listOrderParam"
+        - $ref: "#/components/parameters/offsetParam"
+        - $ref: "#/components/parameters/perPageParam"
       responses:
         '200':
           description: Successful operation
@@ -102,17 +87,11 @@ paths:
     get:
       tags:
         - songs
-      summary: Find song by ID
+      summary: Get song by ID
       description: Returns a single song
-      operationId: getSongById
+      operationId: getSong
       parameters:
-        - name: songId
-          in: path
-          description: ID of song to return
-          required: true
-          schema:
-            type: integer
-            format: int64
+        - $ref: '#/components/parameters/songIdParam'
       responses:
         '200':
           description: successful operation
@@ -136,13 +115,7 @@ paths:
     #   description: ''
     #   operationId: updateSong
     #   parameters:
-    #     - name: songId
-    #       in: path
-    #       description: ID of song that needs to be updated
-    #       required: true
-    #       schema:
-    #         type: integer
-    #         format: int64
+    #    - $ref: '#/components/parameters/songIdParam'
     #   responses:
     #     '200':
     #       description: successful operation
@@ -162,13 +135,7 @@ paths:
     #   description: delete a song
     #   operationId: deleteSong
     #   parameters:
-    #     - name: songId
-    #       in: path
-    #       description: Song id to delete
-    #       required: true
-    #       schema:
-    #         type: integer
-    #         format: int64
+    #    - $ref: '#/components/parameters/songIdParam'
     #   responses:
     #     '400':
     #       description: Invalid song value
@@ -181,13 +148,18 @@ paths:
       tags: [songs]
       operationId: getArrangements
       parameters:
-        - name: songId
-          in: path
-          description: Song id
-          required: true
+        - $ref: '#/components/parameters/songIdParam'
+        - name: include
+          in: query
           schema:
-            type: integer
-            format: int64
+            type: array
+            items: 
+              type: string
+              enum:
+                - keys
+                - sections
+        - $ref: "#/components/parameters/offsetParam"
+        - $ref: "#/components/parameters/perPageParam"
       responses:
         '200':
           description: successful operation
@@ -218,22 +190,10 @@ paths:
   /songs/{songId}/arrangements/{arrangementId}:
     get:
       tags: [songs]
-      operationId: getArrangementById
+      operationId: getArrangement
       parameters:
-        - name: songId
-          in: path
-          description: Song id
-          required: true
-          schema:
-            type: integer
-            format: int64
-        - name: arrangementId
-          in: path
-          description: Arrangement id to delete
-          required: true
-          schema:
-            type: integer
-            format: int64
+        - $ref: '#/components/parameters/songIdParam'
+        - $ref: '#/components/parameters/arrangementIdParam'
       responses:
         '200':
           description: successful operation
@@ -241,6 +201,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrangementResponse'
+      security:
+        - basic_auth: []
+  /songs/{songId}/arrangements/{arrangementId}/sections:
+    get:
+      tags: [songs]
+      operationId: getArrangementSections
+      parameters:
+        - $ref: '#/components/parameters/songIdParam'
+        - $ref: '#/components/parameters/arrangementIdParam'
+        - $ref: "#/components/parameters/offsetParam"
+        - $ref: "#/components/parameters/perPageParam"
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrangementSectionsResponse'
       security:
         - basic_auth: []
   #   patch:
@@ -295,15 +273,33 @@ paths:
   #             #   $ref: '#/components/schemas/Song'
 components:
   schemas:
-    Links:
+    BaseListResponse:
       type: object
       required:
-        - self
+        - links
+        - included
+        - meta
       properties:
-        self:
-          type: string
-      additionalProperties:
-        type: string
+        links:
+          $ref: '#/components/schemas/Links'
+        included:
+          type: array
+          items:
+            type: object
+        meta:
+          $ref: '#/components/schemas/ListMeta'
+    BaseObjectResponse:
+      type: object
+      required:
+        - included
+        - meta
+      properties:
+        included:
+          type: array
+          items:
+            type: object
+        meta:
+          $ref: '#/components/schemas/ObjectMeta'
     BaseDataObject:
       required:
         - type
@@ -318,14 +314,57 @@ components:
           example: "1"
         links:
           $ref: '#/components/schemas/Links'
+        relationships:
+          $ref: '#/components/schemas/Relationships'
+    Links:
+      type: object
+      required:
+        - self
+      properties:
+        self:
+          type: string
+        arrangements:
+          type: string
+        assign_tags:
+          type: string
+        attachments:
+          type: string
+        last_scheduled_item:
+          type: string
+        song_schedules:
+          type: string
+        tags:
+          type: string
+      additionalProperties:
+        type: string
+    Relationships:
+      type: object
+      properties:
+        updated_by:
+          $ref: '#/components/schemas/RelationshipObject'
+        created_by:
+          $ref: '#/components/schemas/RelationshipObject'
+        song:
+          $ref: '#/components/schemas/RelationshipObject'
+      additionalProperties:
+          $ref: '#/components/schemas/RelationshipObject'
+    RelationshipObject:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          properties:
+            type:
+              type: string
+            id:
+              type: string
     ListMeta:
       type: object
       required:
         - total_count
         - count
-        - next
-        - can_order_by
-        - can_query_by
         - parent
       properties:
         total_count:
@@ -345,28 +384,26 @@ components:
           type: array
           items:
             type: string
-        parent:
-          type: object
-          properties:
-            id:
-              type: string
-            type:
-              type: string
-    BaseListResponse:
-      type: object
-      required:
-        - links
-        - included
-        - meta
-      properties:
-        links:
-          $ref: '#/components/schemas/Links'
-        included:
+        can_include:
           type: array
           items:
-            type: object
-        meta:
-          $ref: '#/components/schemas/ListMeta'
+            type: string
+        parent:
+          $ref: '#/components/schemas/MetaParent'
+    ObjectMeta:
+      type: object
+      required:
+        - parent
+      properties:
+        parent:
+          $ref: '#/components/schemas/MetaParent'
+    MetaParent:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
     SongListResponse:
       allOf:
         - $ref: '#/components/schemas/BaseListResponse'
@@ -377,13 +414,11 @@ components:
               items:
                 $ref: '#/components/schemas/Song'
     SongResponse:
-      type: object
-      properties:
-        root:
-          type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseObjectResponse'
+        - type: object
           properties:
             data:
-              type: object
               $ref: '#/components/schemas/Song'
     Song:
       allOf:
@@ -477,23 +512,20 @@ components:
         title:
           type: string
     ArrangementListResponse:
-      type: object
-      properties:
-        root:
-          type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseListResponse'
+        - type: object
           properties:
-            data:
-              type: array
-              items:
-                $ref: '#/components/schemas/Arrangement'
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Arrangement'
     ArrangementResponse:
-      type: object
-      properties:
-        root:
-          type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseObjectResponse'
+        - type: object
           properties:
             data:
-              type: object
               $ref: '#/components/schemas/Arrangement'
     Arrangement:
       allOf:
@@ -507,14 +539,136 @@ components:
               required:
                 - name
               properties:
-                name:
-                  type: string
-                  example: Default Arrangement
                 bpm:
                   type: number
                   format: float
+                created_at:
+                  type: string
+                  format: date-time
+                  example: "2000-01-01T12:00:00Z"
+                has_chords:
+                  type: boolean
+                length:
+                  type: integer
+                meter:
+                  type: string
+                  enum:
+                    - 2/2
+                    - 2/4
+                    - 3/4
+                    - 3/4
+                    - 4/4
+                    - 5/4
+                    - 6/4
+                    - 3/8
+                    - 6/8
+                    - 7/8
+                    - 9/8
+                    - 12/8
+                name:
+                  type: string
+                  example: Default Arrangement
+                notes:
+                  type: string
+                print_margin:
+                  type: string
+                  enum:
+                   - 0.0in
+                   - 0.25in
+                   - 0.5in
+                   - 0.75in
+                   - 1.0in
+                print_orientation:
+                  type: string
+                  enum:
+                    - Portrait
+                    - Landscape
+                print_page_size:
+                  type: string
+                  enum:
+                    - Widescreen (16x9)
+                    - Fullscreen (4x3)
+                    - A4
+                    - Letter
+                    - Legal
+                    - 11x17
+                updated_at:
+                  type: string
+                  format: date-time
+                  example: "2000-01-01T12:00:00Z"
+                chord_chart:
+                  type: string
+                chord_chart_font:
+                  type: string
+                chord_chart_key:
+                  type: string
+                chord_chart_columns:
+                  type: integer
+                chord_chart_font_size:
+                  type: integer
+                has_chord_chart:
+                  type: boolean
+                lyrics_enabled:
+                  type: boolean
+                number_chart_enabled:
+                  type: boolean
+                numeral_chart_enabled:
+                  type: boolean
+                sequence:
+                  type: array
+                  items:
+                    type: string
+                sequence_short:
+                  type: array
+                  items:
+                    type: string
+                sequence_full:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      label:
+                        type: string
+                      number:
+                        type: integer
+                      id:
+                        type: integer
+                chord_chart_chord_color:
+                  type: integer
+                archived_at:
+                  type: string
+                  format: date-time
+                  example: "2000-01-01T12:00:00Z"
                 lyrics:
                   type: string
+    ArrangementSectionsResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseObjectResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ArrangementSections'
+    ArrangementSections:
+      allOf:
+        - $ref: '#/components/schemas/BaseDataObject'
+        - type: object
+          required:
+            - attributes
+          properties:
+            attributes:
+              type: object
+              properties:
+                sections:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      label:
+                        type: string
+                      lyrics:
+                        type: string
+                      breaks_at:
+                        type: string
   requestBodies:
     Song:
       description: Song object
@@ -522,6 +676,42 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Song'
+  parameters:
+    listOrderParam:
+      in: query
+      name: order
+      schema:
+        type: string
+        enum:
+          - none
+          - title
+          - created_at
+          - updated_at
+          - last_scheduled_at
+    offsetParam:
+      in: query
+      name: offset
+      schema:
+        type: integer
+    perPageParam:
+      in: query
+      name: per_page
+      schema:
+        type: integer
+    songIdParam:
+      name: songId
+      in: path
+      description: Song ID
+      required: true
+      schema:
+        type: integer
+    arrangementIdParam:
+      name: arrangementId
+      in: path
+      description: Arrangement ID
+      required: true
+      schema:
+        type: integer
   securitySchemes:
     petstore_auth:
       type: oauth2
