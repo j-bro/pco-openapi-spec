@@ -33,8 +33,28 @@ paths:
         - in: query
           name: where
           schema:
-            type: object
+            $ref: '#/components/schemas/SongQuery'
           description: query parameters
+          explode: true
+          style: deepObject
+        - in: query
+          name: order
+          schema:
+            type: string
+            enum:
+              - none
+              - title
+              - created_at
+              - updated_at
+              - last_scheduled_at
+        - in: query
+          name: offset
+          schema:
+            type: integer
+        - in: query
+          name: per_page
+          schema:
+            type: integer
       responses:
         '200':
           description: Successful operation
@@ -275,6 +295,15 @@ paths:
   #             #   $ref: '#/components/schemas/Song'
 components:
   schemas:
+    Links:
+      type: object
+      required:
+        - self
+      properties:
+        self:
+          type: string
+      additionalProperties:
+        type: string
     BaseDataObject:
       required:
         - type
@@ -287,11 +316,61 @@ components:
         id:
           type: string
           example: "1"
-    SongListResponse:
+        links:
+          $ref: '#/components/schemas/Links'
+    ListMeta:
       type: object
+      required:
+        - total_count
+        - count
+        - next
+        - can_order_by
+        - can_query_by
+        - parent
       properties:
-        root:
+        total_count:
+          type: integer
+        count:
+          type: integer
+        next:
           type: object
+          properties:
+            offset:
+              type: integer
+        can_order_by:
+          type: array
+          items:
+            type: string
+        can_query_by:
+          type: array
+          items:
+            type: string
+        parent:
+          type: object
+          properties:
+            id:
+              type: string
+            type:
+              type: string
+    BaseListResponse:
+      type: object
+      required:
+        - links
+        - included
+        - meta
+      properties:
+        links:
+          $ref: '#/components/schemas/Links'
+        included:
+          type: array
+          items:
+            type: object
+        meta:
+          $ref: '#/components/schemas/ListMeta'
+    SongListResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseListResponse'
+        - type: object
           properties:
             data:
               type: array
@@ -350,6 +429,53 @@ components:
                 ccli_number:
                   type: number
                   format: int64
+    SongQuery:
+      type: object
+      properties:
+        arrangement_name:
+          type: string
+        arrangement_rehearsal_mix_id:
+          type: string
+        arrangement_tag_group_ids:
+          type: string
+        arrangement_tag_ids:
+          type: string
+        author:
+          type: string
+        bpm_max:
+          type: string
+        bpm_min:
+          type: string
+        ccli_number:
+          type: string
+        ending_key:
+          type: string
+        ending_key_minor:
+          type: string
+        folder_id:
+          type: string
+        hidden:
+          type: string
+        key_name:
+          type: string
+        lyrics:
+          type: string
+        meter:
+          type: string
+        service_type_id:
+          type: string
+        song_tag_group_ids:
+          type: string
+        song_tag_ids:
+          type: string
+        starting_key:
+          type: string
+        starting_key_minor:
+          type: string
+        themes:
+          type: string
+        title:
+          type: string
     ArrangementListResponse:
       type: object
       properties:
