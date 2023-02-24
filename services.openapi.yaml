@@ -173,13 +173,7 @@ paths:
   #     tags: [songs]
   #     operationId: createArrangement
   #     parameters:
-  #       - name: songId
-  #         in: path
-  #         description: Song id
-  #         required: true
-  #         schema:
-  #           type: integer
-  #           format: int64
+  #        - $ref: '#/components/parameters/songIdParam'
   #     responses:
   #       '200':
   #         description: successful operation
@@ -225,20 +219,13 @@ paths:
   #     tags: [songs]
   #     operationId: updateArrangement
   #     parameters:
-  #       - name: songId
-  #         in: path
-  #         description: Song id
-  #         required: true
-  #         schema:
-  #           type: integer
-  #           format: int64
+  #       - $ref: '#/components/parameters/songIdParam'
   #       - name: ArrangementId
   #         in: path
   #         description: Arrangement id to delete
   #         required: true
   #         schema:
   #           type: integer
-  #           format: int64
   #     responses:
   #       '200':
   #         description: successful operation
@@ -250,20 +237,13 @@ paths:
   #     tags: [songs]
   #     operationId: deleteArrangement
   #     parameters:
-  #       - name: songId
-  #         in: path
-  #         description: Song id
-  #         required: true
-  #         schema:
-  #           type: integer
-  #           format: int64
+  #       - $ref: '#/components/parameters/songIdParam'
   #       - name: ArrangementId
   #         in: path
   #         description: Arrangement id to delete
   #         required: true
   #         schema:
   #           type: integer
-  #           format: int64
   #     responses:
   #       '200':
   #         description: successful operation
@@ -462,8 +442,7 @@ components:
                   format: date-time
                   example: "2000-01-01T12:00:00Z"
                 ccli_number:
-                  type: number
-                  format: int64
+                  type: integer
     SongQuery:
       type: object
       properties:
