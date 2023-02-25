@@ -648,17 +648,19 @@ components:
                 sections:
                   type: array
                   items:
-                    type: object
-                    required:
-                      - label
-                      - lyrics
-                    properties:
-                      label:
-                        type: string
-                      lyrics:
-                        type: string
-                      breaks_at:
-                        type: string
+                    $ref: '#/components/schemas/ArrangementSection'
+    ArrangementSection:
+      type: object
+      required:
+        - label
+        - lyrics
+      properties:
+        label:
+          type: string
+        lyrics:
+          type: string
+        breaks_at:
+          type: string
   # requestBodies:
   #   Song:
   #     description: Song object
