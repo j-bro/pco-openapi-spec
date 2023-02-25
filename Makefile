@@ -1,17 +1,11 @@
 SERVICES_SPEC_FILE=services.openapi.yaml
 
-.PHONY: generate-go
-generate-go:
-	docker run --rm -v "${PWD}:/local" \
-    openapitools/openapi-generator-cli generate \
-    -i /local/${SERVICES_SPEC_FILE} \
-    -g go \
-    -o /local/gen/go
-
-.PHONY: oapi-codegen
-oapi-codegen:
+.PHONY: codegen-go
+codegen-go:
+	docker build -t pco-openapi-spec/oapi-codegen -f go/Dockerfile .
 	docker run --rm -v "${PWD}:/mnt" \
-    alexleonhardt/oapi-codegen oapi-codegen \
-    /mnt/${SERVICES_SPEC_FILE} \
-    -generate types,client \
-    -package client > go/services/client.go
+	pco-openapi-spec/oapi-codegen \
+	oapi-codegen \
+	-generate types,client \
+	-package client \
+	/mnt/${SERVICES_SPEC_FILE} > go/client.go

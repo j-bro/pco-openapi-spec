@@ -42,11 +42,7 @@ paths:
         - $ref: "#/components/parameters/perPageParam"
       responses:
         '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SongListResponse'
+          $ref: '#/components/responses/GetSongs200Response'
         '400':
           description: Bad request
         '404':
@@ -388,6 +384,8 @@ components:
       allOf:
         - $ref: '#/components/schemas/BaseListResponse'
         - type: object
+          required:
+             - data
           properties:
             data:
               type: array
@@ -397,6 +395,8 @@ components:
       allOf:
         - $ref: '#/components/schemas/BaseObjectResponse'
         - type: object
+          required:
+             - data
           properties:
             data:
               $ref: '#/components/schemas/Song'
@@ -494,6 +494,8 @@ components:
       allOf:
         - $ref: '#/components/schemas/BaseListResponse'
         - type: object
+          required:
+             - data
           properties:
               data:
                 type: array
@@ -503,6 +505,8 @@ components:
       allOf:
         - $ref: '#/components/schemas/BaseObjectResponse'
         - type: object
+          required:
+             - data
           properties:
             data:
               $ref: '#/components/schemas/Arrangement'
@@ -624,6 +628,8 @@ components:
       allOf:
         - $ref: '#/components/schemas/BaseObjectResponse'
         - type: object
+          required:
+             - data
           properties:
             data:
               $ref: '#/components/schemas/ArrangementSections'
@@ -636,11 +642,16 @@ components:
           properties:
             attributes:
               type: object
+              required:
+                - sections
               properties:
                 sections:
                   type: array
                   items:
                     type: object
+                    required:
+                      - label
+                      - lyrics
                     properties:
                       label:
                         type: string
@@ -648,13 +659,20 @@ components:
                         type: string
                       breaks_at:
                         type: string
-  requestBodies:
-    Song:
-      description: Song object
+  # requestBodies:
+  #   Song:
+  #     description: Song object
+  #     content:
+  #       application/json:
+  #         schema:
+  #           $ref: '#/components/schemas/Song'
+  responses:
+    GetSongs200Response:
+      description: Song list
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Song'
+            $ref: '#/components/schemas/SongListResponse'
   parameters:
     listOrderParam:
       in: query
@@ -683,14 +701,14 @@ components:
       description: Song ID
       required: true
       schema:
-        type: integer
+        type: string
     arrangementIdParam:
       name: arrangementId
       in: path
       description: Arrangement ID
       required: true
       schema:
-        type: integer
+        type: string
   securitySchemes:
     petstore_auth:
       type: oauth2
